@@ -30,6 +30,12 @@ export const checkUserIdStatus = async (req, res, next) => {
 
     if (!idIsValid) throw HttpError(404);
 
+    const contact = await User.findById(contactId);
+
+    if (!contact) throw HttpError(404);
+
+    req.user = contact;
+
     next();
   } catch (error) {
     next(error);
