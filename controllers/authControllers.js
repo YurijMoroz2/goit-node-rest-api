@@ -1,30 +1,51 @@
-import HttpError from "../helpers/HttpError.js";
-import validateBody from "../helpers/validateBody.js";
+import { UserAuth } from "../models/userModelAuth.js";
+import { loginUser, signupUser } from "../services/userServise.js";
 
-import { UserAuth } from "../modals/userModelAuth.js";
-import { registerSchema } from "../schemas/userSchemas.js";
+export const register = async (req, res, next) => {
+  try {
+    const { newUser, token } = await signupUser(req.body);
 
-export async function addContactAuth({ password, email, subscription }) {
-    try {
-      const newContact = await UserAuth.create({ password, email, subscription });
-  
-      return newContact;
-    
-    } catch (error) {
-      console.error(error);
-    }
+    res.status(201).json({
+      user: { email: newUser.email, subscription: newUser.subscription, token },
+    });
+  } catch (error) {
+    next(error);
   }
-  export const createContactAuth = async (req, res, next) => {
-    try {
-        // console.log(req.body);
-      const validate = validateBody(registerSchema)(req, res, next);
-    //   console.log(validate);
-      const newContact = await addContactAuth(validate);
-    
-    //   const newContact = await addContactAuth(req.body);
-  
-      res.status(201).json(newContact);
-    } catch (error) {
-      next(error);
-    }
-  };
+};
+
+export const login = async (req, res, next) => {
+  try {
+    const { user, token } = await loginUser(req.body);
+
+    res.status(200).json({
+      token: token,
+      user: { email: user.email, subscription: user.subscription },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkCurrent = (req, res, next) => {
+  try {
+    const { email, subscription } = req.user;
+
+    res.status(200).json({
+      email: email,
+      subscription: subscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const checkLogout = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    await UserAuth.findByIdAndUpdate(_id, { token: null });
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};

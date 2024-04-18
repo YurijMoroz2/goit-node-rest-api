@@ -1,27 +1,28 @@
+import { User } from "../models/userModel.js";
 
-import { User } from "../modals/userModel.js";
-
-export async function listContacts() {
+export async function listContacts(req) {
   try {
-    const contacts = await User.find();
+    const { _id: owner } = req.user;
+    const contacts = await User.find({ owner });
 
     return contacts;
-  
+    
   } catch (err) {
     console.log(err);
   }
 }
 // ============================================
-export async function getContactById(contactId) {
+export async function getContactById(req, contactId) {
   try {
     const contact = await User.findById(contactId);
 
     return contact || null;
-  
+
   } catch (error) {
     console.error(error);
   }
 }
+
 // ======================================
 export async function removeContact(contactId) {
   try {
@@ -30,18 +31,21 @@ export async function removeContact(contactId) {
     if (!removedContact) return null;
 
     return removedContact;
-  
+
   } catch (error) {
     console.error(error);
   }
 }
 // ============================================
-export async function addContact({ name, email, phone }) {
+
+export async function addContact(req) {
   try {
-    const newContact = await User.create({ name, email, phone });
+    const { _id: owner } = req.user;
+
+    const newContact = await User.create({ ...req.body, owner });
 
     return newContact;
-  
+
   } catch (error) {
     console.error(error);
   }
@@ -52,9 +56,9 @@ export async function update_Contact(contactId, body) {
     const existingContact = await User.findByIdAndUpdate(contactId, body, {
       new: true,
     });
-    
+
     return existingContact;
-  
+
   } catch (error) {
     console.error(error);
     throw new Error("Error updating contact");
@@ -71,6 +75,7 @@ export async function updateStatusContact(contactId, body) {
     );
 
     return contactStatus;
+
   } catch (error) {
     throw new Error("Error status contact");
   }

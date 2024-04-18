@@ -1,5 +1,6 @@
 import HttpError from "../helpers/HttpError.js";
 import validateBody from "../helpers/validateBody.js";
+import { User } from "../models/userModel.js";
 import {
   createContactSchema,
   updateContacStatustSchema,
@@ -16,7 +17,7 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    res.status(200).json(await listContacts());
+    res.status(200).json(await listContacts(req));
 
     next();
   } catch (error) {
@@ -28,7 +29,7 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = await getContactById(id);
+    const contact = await getContactById(req, id);
 
     res.status(200).json(contact);
 
@@ -54,9 +55,10 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const validate = validateBody(createContactSchema)(req, res, next);
-    const newContact = await addContact(validate.value);
-
-    res.status(201).json(newContact);
+    if (validate) {
+      const newContact = await addContact(req);
+      res.status(201).json(newContact);
+    }
   } catch (error) {
     next(error);
   }
@@ -92,7 +94,7 @@ export const updateStatusContactController = async (req, res, next) => {
 
     if (!body || Object.keys(body).length === 0) {
       throw HttpError(400, "Body must have at least one field");
-    };
+    }
 
     const validate = validateBody(updateContacStatustSchema)(req, res, next);
 

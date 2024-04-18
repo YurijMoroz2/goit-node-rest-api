@@ -1,21 +1,21 @@
-import { model, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import { model, Schema } from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchemaAuth = new Schema(
-{
+  {
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: [true, "Password is required"],
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
     },
     subscription: {
       type: String,
       enum: ["starter", "pro", "business"],
-      default: "starter"
+      default: "starter",
     },
     token: {
       type: String,
@@ -26,20 +26,17 @@ const userSchemaAuth = new Schema(
     timestamps: true,
     versionKey: false,
   }
-)
-//   owner: {
-//     type: Schema.Types.ObjectId,
-//     ref: 'user',
-//   }
-userSchemaAuth.pre('save' , async function (next){
-  if(!this.isModified('password')) return next();
+);
+userSchemaAuth.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   const salt = await bcrypt.genSalt(10);
 
-  this.password = await bcrypt.hash(this.password , salt);
+  this.password = await bcrypt.hash(this.password, salt);
 
   next();
 });
-userSchemaAuth.methods.checkUserPassword = (candidate, paswordHash)=>bcrypt.compare(candidate, paswordHash);
+userSchemaAuth.methods.checkUserPassword = (candidate, paswordHash) =>
+  bcrypt.compare(candidate, paswordHash);
 
-  export const UserAuth = model('user', userSchemaAuth);
+export const UserAuth = model("user", userSchemaAuth);

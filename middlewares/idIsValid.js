@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import HttpError from "../helpers/HttpError.js";
-import { User } from "../modals/userModel.js";
+import { User } from "../models/userModel.js";
 
 export const checkUserId = async (req, res, next) => {
   try {

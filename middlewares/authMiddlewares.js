@@ -1,52 +1,62 @@
-// import { checkToken } from '../services/jwtService.js';
-// import { checkUserExistsService, getUserByIdService } from '../services/userService.js';
-// import { catchAsync } from '../utils/catchAsync.js';
-// import { HttpError } from '../utils/httpError.js';
-// import { loginUserDataValidator, signupUserDataValidator } from '../utils/userValidators.js';
+import HttpError from "../helpers/HttpError.js";
+import validateBody from "../helpers/validateBody.js";
+import { loginSchema, registerSchema } from "../schemas/userSchemas.js";
+import { checkToken } from "../services/jwtService.js";
+import {
+  checkUserExistsService,
+  getUserByIdService,
+} from "../services/userServise.js";
 
-// export const checkSignupData = catchAsync(async (req, res, next) => {
-//   const { value, errors } = signupUserDataValidator(req.body);
+export const checkSignupData = async (req, res, next) => {
+  try {
+    const { value } = validateBody(registerSchema)(req, res, next);
 
-//   if (errors) throw new HttpError(400, 'Invalid user data..', errors);
+    if (!value) throw HttpError(401);
 
-//   const userExists = await checkUserExistsService({ email: value.email });
+    const userExists = await checkUserExistsService({ email: value.email });
 
-//   if (userExists) throw new HttpError(409, 'User with this email already exists..');
+    if (userExists) throw HttpError(409, "Email in use");
 
-//   req.body = value;
+    req.body = value;
 
-//   next();
-// });
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
-// export const checkLoginData = (req, res, next) => {
-//   const { value, errors } = loginUserDataValidator(req.body);
+export const checkLoginData = async (req, res, next) => {
+  try {
+    const { value } = validateBody(loginSchema)(req, res, next);
 
-//   if (errors) throw new HttpError(401, 'Unauthorized..', errors);
+    if (!value) throw HttpError(400);
 
-//   req.body = value;
+    req.body = value;
 
-//   next();
-// };
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
-// export const protect = catchAsync(async (req, res, next) => {
-//   const token =
-//     req.headers.authorization?.startsWith('Bearer ') && req.headers.authorization.split(' ')[1];
-//   const userId = checkToken(token);
+export const protect = async (req, res, next) => {
+  try {
+    const token =
+      req.headers.authorization?.startsWith("Bearer ") &&
+      req.headers.authorization.split(" ")[1];
 
-//   if (!userId) throw new HttpError(401, 'Unauthorized..');
+    const userId = checkToken(token);
 
-//   const currentUser = await getUserByIdService(userId);
+    if (!userId) throw HttpError(401);
 
-//   if (!currentUser) throw new HttpError(401, 'Unauthorized..');
+    const currentUser = await getUserByIdService(userId);
 
-//   req.user = currentUser;
+    if (!currentUser) throw HttpError(401);
 
-//   next();
-// });
+    req.user = currentUser;
 
-// // allowFor('admin', 'moderator')
-// export const allowFor = (...roles) => (req, res, next) => {
-//   if (roles.includes(req.user.role)) return next();
-
-//   next(new HttpError(403, 'You are not allowed to perform this action..'));
-// }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};

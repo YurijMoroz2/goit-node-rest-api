@@ -8,21 +8,23 @@ import {
   updateStatusContactController,
 } from "../controllers/contactsControllers.js";
 import { checkUserId, checkUserIdStatus } from "../middlewares/idIsValid.js";
+import { protect } from "../middlewares/authMiddlewares.js";
 
 const contactsRouter = express.Router();
 
-contactsRouter.get("/", getAllContacts);
+contactsRouter.get("/",protect, getAllContacts);
 
-contactsRouter.get("/:id", checkUserId, getOneContact);
+contactsRouter.get("/:id",protect, checkUserId, getOneContact);
 
-contactsRouter.delete("/:id", checkUserId, deleteContact);
+contactsRouter.delete("/:id",protect, checkUserId, deleteContact);
 
-contactsRouter.post("/", createContact);
+contactsRouter.post("/",protect, createContact);
 
-contactsRouter.put("/:id", checkUserId, updateContact);
+contactsRouter.put("/:id",protect, checkUserId, updateContact);
 
 contactsRouter.patch(
   "/:contactId/:favorite",
+  protect,
   checkUserIdStatus,
   updateStatusContactController
 );
