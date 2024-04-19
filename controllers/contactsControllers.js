@@ -29,8 +29,9 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = await getContactById(req, id);
 
+    const contact = await getContactById(req, id);
+   
     res.status(200).json(contact);
 
     next();
@@ -42,7 +43,7 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const remove_contact = await removeContact(id);
+    const remove_contact = await removeContact(req, id);
 
     res.status(200).json(remove_contact);
 
@@ -55,6 +56,7 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const validate = validateBody(createContactSchema)(req, res, next);
+    
     if (validate) {
       const newContact = await addContact(req);
       res.status(201).json(newContact);
@@ -75,7 +77,7 @@ export const updateContact = async (req, res, next) => {
 
     const validate = validateBody(updateContactSchema)(req, res, next);
 
-    const newUpdateContact = await update_Contact(id, validate.value);
+    const newUpdateContact = await update_Contact(req, id, validate.value);
 
     res.status(200).json(newUpdateContact);
 
@@ -99,6 +101,7 @@ export const updateStatusContactController = async (req, res, next) => {
     const validate = validateBody(updateContacStatustSchema)(req, res, next);
 
     const newUpdateContactStatus = await updateStatusContact(
+      req,
       contactId,
       validate.value
     );

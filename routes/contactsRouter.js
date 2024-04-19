@@ -14,18 +14,18 @@ const contactsRouter = express.Router();
 
 contactsRouter.get("/",protect, getAllContacts);
 
-contactsRouter.get("/:id",protect, checkUserId, getOneContact);
+contactsRouter.get("/:id", checkUserId, protect, getOneContact);
 
-contactsRouter.delete("/:id",protect, checkUserId, deleteContact);
+contactsRouter.delete("/:id", checkUserId, protect, deleteContact);
 
 contactsRouter.post("/",protect, createContact);
 
-contactsRouter.put("/:id",protect, checkUserId, updateContact);
+contactsRouter.put("/:id", checkUserId, protect, updateContact);
 
 contactsRouter.patch(
   "/:contactId/:favorite",
-  protect,
-  checkUserIdStatus,
+    checkUserIdStatus,
+    protect,
   updateStatusContactController
 );
 
