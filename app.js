@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import mongoose from 'mongoose';
 
 import contactsRouter from "./routes/contactsRouter.js";
+import {router as authRouter} from "./routes/authRouter.js";
 
 dotenv.config();  
 
@@ -22,6 +23,7 @@ if (process.env.NODE_ENV === "development") app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/users", authRouter)
 app.use("/api/contacts", contactsRouter);
 
 app.use((_, res) => {
@@ -29,6 +31,7 @@ app.use((_, res) => {
 });
 
 app.use((err, req, res, next) => {
+  // console.log(err);
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
 });
