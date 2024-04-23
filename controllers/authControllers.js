@@ -1,3 +1,7 @@
+import path from "path";
+import { promises as fs } from "fs";
+import Jimp from "jimp";
+
 import { UserAuth } from "../models/userModelAuth.js";
 import { loginUser, signupUser } from "../services/userServise.js";
 
@@ -45,6 +49,31 @@ export const checkLogout = async (req, res, next) => {
     await UserAuth.findByIdAndUpdate(_id, { token: null });
 
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    const { file } = req;
+    const { _id } = req.user;
+    const { path: tempUpload, originalname } = file;
+
+    const image = await Jimp.read(file.path);
+    await image.resize(200, 150);
+    await image.writeAsync(file.path);
+
+    const filename = `${_id}_${originalname}`;
+    const resultUpload = path.join(path.join("public", "avatars"), filename);
+    await fs.rename(tempUpload, resultUpload);
+
+    const avatarURL = path.join(originalname);
+    await UserAuth.findByIdAndUpdate(_id, { avatarURL });
+
+    res.status(200).json({
+      avatarURL: avatarURL,
+    });
   } catch (error) {
     next(error);
   }

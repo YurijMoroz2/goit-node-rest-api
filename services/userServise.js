@@ -1,3 +1,5 @@
+import path from "path";
+
 import HttpError from "../helpers/HttpError.js";
 import { UserAuth } from "../models/userModelAuth.js";
 import { signToken } from "./jwtService.js";
@@ -67,5 +69,6 @@ export const loginUser = async ({ email, password }) => {
     { new: true }
   );
 
-  return { user, token };
+  return { user, token  };
 };
+// ===================================

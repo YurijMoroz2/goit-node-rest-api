@@ -50,7 +50,7 @@ export const protect = async (req, res, next) => {
     if (!userId) throw HttpError(401);
 
     const currentUser = await getUserByIdService(userId);
-console.log(currentUser);
+    
     if (!currentUser) throw HttpError(401);
 
     req.user = currentUser;
