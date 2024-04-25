@@ -61,18 +61,18 @@ export const updateAvatar = async (req, res, next) => {
     const { path: tempUpload, originalname } = file;
 
     const image = await Jimp.read(file.path);
-    await image.resize(200, 150);
+    await image.resize(250, 250);
     await image.writeAsync(file.path);
 
     const filename = `${_id}_${originalname}`;
     const resultUpload = path.join(path.join("public", "avatars"), filename);
     await fs.rename(tempUpload, resultUpload);
 
-    const avatarURL = path.join(originalname);
+    const avatarURL = path.join('avatars',originalname);
     await UserAuth.findByIdAndUpdate(_id, { avatarURL });
 
     res.status(200).json({
-      avatarURL: avatarURL,
+      avatarURL
     });
   } catch (error) {
     next(error);
