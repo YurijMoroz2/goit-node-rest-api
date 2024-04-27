@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 
 import contactsRouter from "./routes/contactsRouter.js";
 import {router as authRouter} from "./routes/authRouter.js";
+// import { upload } from "./middlewares/upload.js";
 
 dotenv.config();  
 
@@ -22,9 +23,11 @@ if (process.env.NODE_ENV === "development") app.use(morgan("tiny"));
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 app.use("/api/users", authRouter)
 app.use("/api/contacts", contactsRouter);
+// app.post("/api/avatars", upload.single("cover"))
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
