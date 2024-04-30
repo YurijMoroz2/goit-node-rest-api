@@ -1,17 +1,17 @@
 import HttpError from "../helpers/HttpError.js";
-import { UserAuth } from "../models/userModelAuth.js";
+import { UserModel } from "../models/userModel.js";
 import { signToken } from "./jwtService.js";
 import { nanoid } from "nanoid";
 
 export const createUserService = async (userData) => {
-  const newUser = await UserAuth.create(userData);
+  const newUser = await UserModel.create(userData);
 
   newUser.password = undefined;
 
   return newUser;
 };
 // ======================
-export const getUsersService = () => UserAuth.find();
+export const getUsersService = () => UserModel.find();
 // =============================
 
 export const updateUserService = (user, userData) => {
@@ -25,24 +25,24 @@ export const updateUserService = (user, userData) => {
 /**
  * Delete user
  */
-export const deleteUserService = (id) => UserAuth.findByIdAndDelete(id);
+export const deleteUserService = (id) => UserModel.findByIdAndDelete(id);
 
 /**
  * Check if user exists by filter
  */
-export const checkUserExistsService = (filter) => UserAuth.exists(filter);
+export const checkUserExistsService = (filter) => UserModel.exists(filter);
 
 /**
  * Get user by id
  */
-export const getUserByIdService = (id) => UserAuth.findById(id);
+export const getUserByIdService = (id) => UserModel.findById(id);
 
 // =========================================
 export const signupUser = async (userData) => {
   
   const verificationToken = nanoid();
 
-  const newUser = await UserAuth.create({
+  const newUser = await UserModel.create({
     ...userData,
     verificationToken,
     // role: userRoles.USER,
@@ -57,7 +57,7 @@ export const signupUser = async (userData) => {
 
 export const loginUser = async ({ email, password }) => {
 
-  const user = await UserAuth.findOne({ email }).select("+password");
+  const user = await UserModel.findOne({ email }).select("+password");
   
   if (!user) throw HttpError(401, "Email or password is wrong");
 
@@ -70,7 +70,7 @@ export const loginUser = async ({ email, password }) => {
   user.password = undefined;
   const token = signToken(user.id);
 
-  const updatedUser = await UserAuth.findByIdAndUpdate(
+  const updatedUser = await UserModel.findByIdAndUpdate(
     user.id,
     { token: token },
     { new: true }

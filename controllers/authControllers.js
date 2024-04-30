@@ -2,12 +2,12 @@ import path from "path";
 import { promises as fs } from "fs";
 import Jimp from "jimp";
 
-import { UserAuth } from "../models/userModelAuth.js";
 import { loginUser, signupUser } from "../services/userServise.js";
 import { sendEmail } from "../helpers/sendEmail.js";
 import HttpError from "../helpers/HttpError.js";
 import { emailSchema } from "../schemas/userSchemas.js";
 import validateBody from "../helpers/validateBody.js";
+import { UserModel } from "../models/userModel.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -29,7 +29,7 @@ export const register = async (req, res, next) => {
     next(error);
   }
 };
-
+// ======================================
 export const login = async (req, res, next) => {
   try {
     const { user, token } = await loginUser(req.body);
@@ -42,7 +42,7 @@ export const login = async (req, res, next) => {
     next(error);
   }
 };
-
+// ============================================
 export const checkCurrent = (req, res, next) => {
   try {
     const { email, subscription } = req.user;
@@ -55,18 +55,19 @@ export const checkCurrent = (req, res, next) => {
     next(error);
   }
 };
+// =====================================================
 export const checkLogout = async (req, res, next) => {
   try {
     const { _id } = req.user;
 
-    await UserAuth.findByIdAndUpdate(_id, { token: null });
+    await UserModel.findByIdAndUpdate(_id, { token: null });
 
     res.status(204).send();
   } catch (error) {
     next(error);
   }
 };
-
+// =============================================
 export const updateAvatar = async (req, res, next) => {
   try {
     const { file } = req;
@@ -82,7 +83,7 @@ export const updateAvatar = async (req, res, next) => {
     await fs.rename(tempUpload, resultUpload);
 
     const avatarURL = path.join("avatars", originalname);
-    await UserAuth.findByIdAndUpdate(_id, { avatarURL });
+    await UserModel .findByIdAndUpdate(_id, { avatarURL });
 
     res.status(200).json({
       avatarURL,
@@ -91,11 +92,11 @@ export const updateAvatar = async (req, res, next) => {
     next(error);
   }
 };
-
+// ===========================================================
 export const verifyUser = async (req, res, next) => {
   try {
     const { verificationToken } = req.params;
-    const user = await UserAuth.findOne({ verificationToken });
+    const user = await UserModel .findOne({ verificationToken });
 
     if (!user) {
       throw HttpError(404, "User not found");
@@ -103,7 +104,7 @@ export const verifyUser = async (req, res, next) => {
 
     if (user.verify) throw HttpError(400, "Verification has already been passed");
 
-    await UserAuth.findByIdAndUpdate(user._id, {
+    await UserModel .findByIdAndUpdate(user._id, {
       verify: true,
       verificationToken: null,
     });
@@ -117,7 +118,7 @@ export const verifyUser = async (req, res, next) => {
     next(error);
   }
 };
-
+// =========================================================
 export const resendVerifyEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -129,7 +130,7 @@ export const resendVerifyEmail = async (req, res, next) => {
     
     const validate = validateBody(emailSchema)(req, res, next);
 
-    const user = await UserAuth.findOne({ email });
+    const user = await UserModel .findOne({ email });
     
     if (!user) {
       throw HttpError(401);

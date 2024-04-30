@@ -1,11 +1,10 @@
-import HttpError from "../helpers/HttpError.js";
-import { User } from "../models/userModel.js";
+import { ContactModels } from "../models/ContactModel.js";
 
 export async function listContacts(req) {
   try {
     const { _id: owner } = req.user;
 
-    const contacts = await User.find({ owner });
+    const contacts = await ContactModels.find({ owner });
 
     return contacts;
     
@@ -18,7 +17,7 @@ export async function getContactById(req, contactId) {
   try {
     const { _id: owner } = req.user;
     
-    const contact = await User.findOne({ _id: contactId, owner });
+    const contact = await ContactModels.findOne({ _id: contactId, owner });
 
     if(!contact){
   return null
@@ -35,7 +34,7 @@ export async function removeContact(req, contactId) {
   try {
     const { _id: owner } = req.user;
 
-    const removedContact = await User.findOneAndDelete({ _id: contactId, owner });
+    const removedContact = await ContactModels.findOneAndDelete({ _id: contactId, owner });
 
     if (!removedContact) return null;
 
@@ -51,7 +50,7 @@ export async function addContact(req) {
   try {
     const { _id: owner } = req.user;
 
-    const newContact = await User.create({ ...req.body, owner});
+    const newContact = await ContactModels.create({ ...req.body, owner});
 
     return newContact;
 
@@ -64,7 +63,7 @@ export async function update_Contact(req, contactId, body) {
   try {
     const { _id: owner } = req.user;
 
-    const existingContact = await User.findOneAndUpdate({ _id: contactId, owner }, body, {
+    const existingContact = await ContactModels.findOneAndUpdate({ _id: contactId, owner }, body, {
       new: true,
     });
 
@@ -87,7 +86,7 @@ export async function updateStatusContact(req,contactId, body) {
 
     const { favorite } = body;
 
-    const contactStatus = await User.findOneAndUpdate(
+    const contactStatus = await ContactModels.findOneAndUpdate(
       { _id: contactId, owner },
       { favorite },
       { new: true }

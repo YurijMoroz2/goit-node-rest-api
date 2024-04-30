@@ -1,24 +1,38 @@
 import { model, Schema } from "mongoose";
+import bcrypt from "bcryptjs";
+import gravatar from "gravatar";
 
-const userSchema = new Schema(
+const userSchemaAuth = new Schema(
   {
-    name: {
+    password: {
       type: String,
-      required: [true, "Set name for contact"],
+      required: [true, "Password is required"],
     },
     email: {
       type: String,
+      required: [true, "Email is required"],
+      unique: true,
     },
-    phone: {
+    subscription: {
+      type: String,
+      enum: ["starter", "pro", "business"],
+      default: "starter",
+    },
+    token: {
+      type: String,
+      default: null,
+    },
+    avatarURL: {
       type: String,
     },
-    favorite: {
+
+    verify: {
       type: Boolean,
       default: false,
     },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "user",
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
     },
   },
   {
@@ -27,4 +41,21 @@ const userSchema = new Schema(
   }
 );
 
-export const User = model("contacts", userSchema);
+userSchemaAuth.pre("save", async function (next) {
+  if (this.isNew) {
+    this.avatarURL = gravatar.url(this.email);
+  }
+
+  if (!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+
+  this.password = await bcrypt.hash(this.password, salt);
+
+  next();
+});
+
+userSchemaAuth.methods.checkUserPassword = (candidate, paswordHash) =>
+  bcrypt.compare(candidate, paswordHash);
+
+export const UserModel = model("user", userSchemaAuth);

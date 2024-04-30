@@ -1,6 +1,5 @@
 import HttpError from "../helpers/HttpError.js";
 import validateBody from "../helpers/validateBody.js";
-import { User } from "../models/userModel.js";
 import {
   createContactSchema,
   updateContacStatustSchema,
