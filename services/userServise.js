@@ -1,8 +1,7 @@
-import path from "path";
-
 import HttpError from "../helpers/HttpError.js";
 import { UserAuth } from "../models/userModelAuth.js";
 import { signToken } from "./jwtService.js";
+import { nanoid } from "nanoid";
 
 export const createUserService = async (userData) => {
   const newUser = await UserAuth.create(userData);
@@ -40,8 +39,12 @@ export const getUserByIdService = (id) => UserAuth.findById(id);
 
 // =========================================
 export const signupUser = async (userData) => {
+  
+  const verificationToken = nanoid();
+
   const newUser = await UserAuth.create({
     ...userData,
+    verificationToken,
     // role: userRoles.USER,
   });
 
@@ -53,8 +56,12 @@ export const signupUser = async (userData) => {
 // =================================
 
 export const loginUser = async ({ email, password }) => {
+
   const user = await UserAuth.findOne({ email }).select("+password");
+  
   if (!user) throw HttpError(401, "Email or password is wrong");
+
+  if(!user.verify) throw HttpError(401, "Check failed")
 
   const passwordIsValid = await user.checkUserPassword(password, user.password);
 

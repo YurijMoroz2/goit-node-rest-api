@@ -9,8 +9,7 @@ export const registerSchema = Joi.object()
     email: Joi.string().email().required().messages({
       "string.email": "Please enter a valid email address (must contain @)",
     }),
-    
-  });
+      });
 
   export const loginSchema = Joi.object()
   .options({ abortEarly: false })
@@ -22,3 +21,11 @@ export const registerSchema = Joi.object()
       "string.min": "The password must contain at least 7 characters",
     }),
   });
+
+  export const emailSchema = Joi.object()
+  .options({abortEarly:false})
+  .keys({
+    email: Joi.string().email().required().messages({
+  "string.email": "Please enter a valid email address (must contain @)",
+}),
+});

@@ -2,22 +2,24 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 import contactsRouter from "./routes/contactsRouter.js";
-import {router as authRouter} from "./routes/authRouter.js";
-// import { upload } from "./middlewares/upload.js";
+import { router as authRouter } from "./routes/authRouter.js";
 
-dotenv.config();  
+dotenv.config();
 
 const app = express();
 
 mongoose
-.connect(process.env.MONGODB_URL)
-.then(()=>{console.log('MongoDB connected...');})
-.catch((err)=>{
-  console.log(err);
-  process.exit();})
+  .connect(process.env.MONGODB_URL)
+  .then(() => {
+    console.log("MongoDB connected...");
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit();
+  });
 
 if (process.env.NODE_ENV === "development") app.use(morgan("tiny"));
 
@@ -25,17 +27,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-app.use("/api/users", authRouter)
+app.use("/api/users", authRouter);
 app.use("/api/contacts", contactsRouter);
-// app.post("/api/avatars", upload.single("cover"))
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {
-  // console.log(err);
+
   const { status = 500, message = "Server error" } = err;
+  
   res.status(status).json({ message });
 });
 

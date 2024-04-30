@@ -4,14 +4,27 @@ import Jimp from "jimp";
 
 import { UserAuth } from "../models/userModelAuth.js";
 import { loginUser, signupUser } from "../services/userServise.js";
+import { sendEmail } from "../helpers/sendEmail.js";
+import HttpError from "../helpers/HttpError.js";
+import { emailSchema } from "../schemas/userSchemas.js";
+import validateBody from "../helpers/validateBody.js";
 
 export const register = async (req, res, next) => {
   try {
     const { newUser, token } = await signupUser(req.body);
 
+    const verifyEmail = {
+      to: req.body.email,
+      subject: "Verify email",
+      html: `<a target="_blank" href="${process.env.BASE_URL}/api/users/verify/${newUser.verificationToken}">Click verify email</a>`,
+    };
+    
+    await sendEmail(verifyEmail);
+
     res.status(201).json({
       user: { email: newUser.email, subscription: newUser.subscription, token },
     });
+
   } catch (error) {
     next(error);
   }
@@ -68,12 +81,76 @@ export const updateAvatar = async (req, res, next) => {
     const resultUpload = path.join(path.join("public", "avatars"), filename);
     await fs.rename(tempUpload, resultUpload);
 
-    const avatarURL = path.join('avatars',originalname);
+    const avatarURL = path.join("avatars", originalname);
     await UserAuth.findByIdAndUpdate(_id, { avatarURL });
 
     res.status(200).json({
-      avatarURL
+      avatarURL,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyUser = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await UserAuth.findOne({ verificationToken });
+
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+
+    if (user.verify) throw HttpError(400, "Verification has already been passed");
+
+    await UserAuth.findByIdAndUpdate(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+
+    res.status(200).json({
+      message: "Verification successful",
+    });
+
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const resendVerifyEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const body = req.body;
+
+    if (!body || Object.keys(body).length === 0 || !email) {
+      throw HttpError(400, "missing required field email");
+    }
+    
+    const validate = validateBody(emailSchema)(req, res, next);
+
+    const user = await UserAuth.findOne({ email });
+    
+    if (!user) {
+      throw HttpError(401);
+    }
+    
+    if (user.verify) {
+      throw HttpError(400, "Verification has already been passed");
+    }
+
+    const verifyEmail = {
+      to: email,
+      subject: "Verify email",
+      html: `<a target="_blank" href="${process.env.BASE_URL}/api/users/verify/${user.verificationToken}">Click verify email</a>`,
+    };
+
+    await sendEmail(verifyEmail);
+
+    res.status(200).json({
+      message: "Verification email sent",
+    });
+    
   } catch (error) {
     next(error);
   }

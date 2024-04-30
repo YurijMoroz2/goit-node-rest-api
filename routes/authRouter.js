@@ -6,6 +6,8 @@ import {
   login,
   checkLogout,
   updateAvatar,
+  verifyUser,
+  resendVerifyEmail,
 } from "../controllers/authControllers.js";
 import {
   checkLoginData,
@@ -24,5 +26,9 @@ router.post("/logout", protect, checkLogout);
 router.get("/current", protect, checkCurrent);
 
 router.patch("/avatars" , protect, uploadAvatar, updateAvatar );
+
+router.get('/verify/:verificationToken', verifyUser);
+
+router.post('/verify', resendVerifyEmail)
 
 export { router };

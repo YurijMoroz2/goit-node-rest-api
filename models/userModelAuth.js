@@ -1,6 +1,5 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
-// import crypto from "crypto";
 import gravatar from "gravatar";
 
 const userSchemaAuth = new Schema(
@@ -23,9 +22,17 @@ const userSchemaAuth = new Schema(
       type: String,
       default: null,
     },
-    avatarURL:
-    {      
-      type: String,      
+    avatarURL: {
+      type: String,
+    },
+
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
     },
   },
   {
@@ -36,8 +43,8 @@ const userSchemaAuth = new Schema(
 
 userSchemaAuth.pre("save", async function (next) {
   if (this.isNew) {
-    this.avatarURL = gravatar.url(this.email)
-     };
+    this.avatarURL = gravatar.url(this.email);
+  }
 
   if (!this.isModified("password")) return next();
 
